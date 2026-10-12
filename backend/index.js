@@ -181,8 +181,8 @@ const server = createServer(async (request, response) => {
 
   const url = new URL(request.url || "/", `http://${request.headers.host || "localhost"}`);
   try {
-    if (request.method === "GET" && url.pathname === "/api/health") {
-      send(response, 200, { ok: true, service: "wordquest-api", storage: "mongodb" });
+    if (request.method === "GET" && (url.pathname === "/api/health" || url.pathname === "/health" || url.pathname === "/")) {
+      send(response, 200, { ok: true, service: "wordquest-api", storage: "mongodb", dbState: mongoose.connection.readyState === 1 ? "connected" : "connecting" });
       return;
     }
 
@@ -336,18 +336,25 @@ const server = createServer(async (request, response) => {
   }
 });
 
+console.log(`Starting WordQuest server on port ${port}...`);
+
+server.listen(port, "0.0.0.0", () => {
+  console.log(`WordQuest HTTP server listening on 0.0.0.0:${port}`);
+});
+
 const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.DATABASE_URL;
 
 if (!mongoUri) {
-  console.error("MONGODB_URI or MONGO_URL is missing. Add it to backend/.env or your environment variables before starting the backend.");
-  process.exit(1);
-}
-
-try {
-  await mongoose.connect(mongoUri, { dbName: "wordquest" });
-  await migrateLocalData();
-  server.listen(port, "0.0.0.0", () => console.log(`WordQuest API running on port ${port} (0.0.0.0)`));
-} catch (error) {
-  console.error("Could not connect to MongoDB:", error.message);
-  process.exit(1);
+  console.error("MONGODB_URI or MONGO_URL is missing. Please set it in Railway Variables.");
+} else {
+  const safeHost = mongoUri.includes("@") ? mongoUri.split("@")[1].split("/")[0] : "configured URI";
+  console.log(`Connecting to MongoDB cluster (${safeHost})...`);
+  mongoose.connect(mongoUri, { dbName: "wordquest", serverSelectionTimeoutMS: 8000 })
+    .then(async () => {
+      console.log("Successfully connected to MongoDB!");
+      await migrateLocalData();
+    })
+    .catch((error) => {
+      console.error("Could not connect to MongoDB:", error.message);
+    });
 }
