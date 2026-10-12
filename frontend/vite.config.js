@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const frontendRoot = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  base: "./",
   root: frontendRoot,
   plugins: [react()],
   server: {
