@@ -346,7 +346,7 @@ if (!mongoUri) {
 try {
   await mongoose.connect(mongoUri, { dbName: "wordquest" });
   await migrateLocalData();
-  server.listen(port, () => console.log(`WordQuest API running at http://localhost:${port} (MongoDB storage)`));
+  server.listen(port, "0.0.0.0", () => console.log(`WordQuest API running on port ${port} (0.0.0.0)`));
 } catch (error) {
   console.error("Could not connect to MongoDB:", error.message);
   process.exit(1);
