@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",
+    "dotenv": "^18.0.7",
+    "mongoose": "^9.11.1",
     "react": "latest",
     "react-dom": "latest",
     "vite": "latest"
