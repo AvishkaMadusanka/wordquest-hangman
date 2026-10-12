@@ -16,6 +16,7 @@ const allowedOrigins = new Set([
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://localhost:4173",
+  "https://avishkamadusanka.github.io",
   ...(process.env.FRONTEND_URL || "").split(",").map((origin) => origin.trim()).filter(Boolean)
 ]);
 
@@ -172,6 +173,7 @@ async function migrateLocalData() {
 }
 
 const server = createServer(async (request, response) => {
+  console.log(`[HTTP] ${request.method} ${request.url}`);
   applyCors(request, response);
   if (request.method === "OPTIONS") {
     response.writeHead(204);
