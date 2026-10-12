@@ -319,10 +319,13 @@ function App() {
   };
 
   const startGame = (category = selectedCategory, difficulty = selectedDifficulty, mode = "classic") => {
-    const daily = mode === "daily" ? getDailyChallenge() : null;
-    const chosen = daily?.entry || randomWord(category, difficulty === "All" ? difficultyForLevel(gameLevel) : difficulty);
+    const validCategory = typeof category === "string" ? category : selectedCategory;
+    const validDifficulty = typeof difficulty === "string" ? difficulty : selectedDifficulty;
+    const validMode = typeof mode === "string" ? mode : "classic";
+    const daily = validMode === "daily" ? getDailyChallenge() : null;
+    const chosen = daily?.entry || randomWord(validCategory, validDifficulty === "All" ? difficultyForLevel(gameLevel) : validDifficulty);
     setCurrent(chosen);
-    setGameMode(mode);
+    setGameMode(validMode);
     setChallengeDate(daily?.date || null);
     if (daily) {
       setSelectedCategory("All");
@@ -337,8 +340,11 @@ function App() {
   };
 
   const restartGame = () => {
-    setStats(INITIAL_STATS);
-    startGame();
+    setGuessed(new Set());
+    setMisses(0);
+    setHintsLeft(1);
+    setHintShown(false);
+    setResult(null);
   };
 
   const finishGame = (nextResult) => {
@@ -476,7 +482,7 @@ function App() {
               <Keyboard guessed={guessed} word={current.word} onGuess={guess} />
               <p className="keyboard-note">Type on your keyboard or tap a letter above</p>
             </div>
-            <aside className="side-column"><div className="figure-card"><div className="figure-header"><span>Attempts left</span><strong>{maxMistakes - misses}</strong></div><div className="progress-track"><span style={{ width: `${((maxMistakes - misses) / maxMistakes) * 100}%` }}></span></div><HangmanFigure misses={misses} maxMistakes={maxMistakes} message={hintShown ? current.hint : ""} /></div><StatsCard stats={remotePlayer ? { played: remotePlayer.played, won: remotePlayer.wins, lost: remotePlayer.losses, score: remotePlayer.score, best: remotePlayer.bestStreak } : account ? { played: 0, won: 0, lost: 0, score: 0, best: 0 } : stats} /><button className="new-game-button" type="button" onClick={startGame}><span aria-hidden="true">&#x21BB;</span> New game</button><button className="restart-button" type="button" onClick={restartGame}><span aria-hidden="true">&#x21BA;</span> Restart</button></aside>
+            <aside className="side-column"><div className="figure-card"><div className="figure-header"><span>Attempts left</span><strong>{maxMistakes - misses}</strong></div><div className="progress-track"><span style={{ width: `${((maxMistakes - misses) / maxMistakes) * 100}%` }}></span></div><HangmanFigure misses={misses} maxMistakes={maxMistakes} message={hintShown ? current.hint : ""} /></div><StatsCard stats={remotePlayer ? { played: remotePlayer.played, won: remotePlayer.wins, lost: remotePlayer.losses, score: remotePlayer.score, best: remotePlayer.bestStreak } : account ? { played: 0, won: 0, lost: 0, score: 0, best: 0 } : stats} /><button className="new-game-button" type="button" onClick={() => startGame()}><span aria-hidden="true">&#x21BB;</span> New game</button><button className="restart-button" type="button" onClick={restartGame}><span aria-hidden="true">&#x21BA;</span> Restart</button></aside>
           </section>
           {account && <section className="records-layout" aria-label="Player records">
             <LeaderboardCard players={leaderboard} online={backendOnline} />
