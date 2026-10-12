@@ -336,13 +336,15 @@ const server = createServer(async (request, response) => {
   }
 });
 
-if (!process.env.MONGODB_URI) {
-  console.error("MONGODB_URI is missing. Add it to backend/.env before starting the backend.");
+const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.DATABASE_URL;
+
+if (!mongoUri) {
+  console.error("MONGODB_URI or MONGO_URL is missing. Add it to backend/.env or your environment variables before starting the backend.");
   process.exit(1);
 }
 
 try {
-  await mongoose.connect(process.env.MONGODB_URI, { dbName: "wordquest" });
+  await mongoose.connect(mongoUri, { dbName: "wordquest" });
   await migrateLocalData();
   server.listen(port, () => console.log(`WordQuest API running at http://localhost:${port} (MongoDB storage)`));
 } catch (error) {

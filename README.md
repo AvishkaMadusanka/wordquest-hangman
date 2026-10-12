@@ -1,55 +1,174 @@
-﻿# WordQuest
+# WordQuest — Modern Hangman Game
 
-WordQuest is a responsive Hangman game built with React, Vite, CSS, and a Node.js API. It includes category and difficulty filters, a shared daily challenge, hints, keyboard input, sound, level progression, account-based stats, a server leaderboard, and per-account game history.
+[![Live Demo](https://img.shields.io/badge/Demo-Live%20Website-success?style=for-the-badge&logo=github)](https://avishkamadusanka.github.io/wordquest-hangman/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?style=for-the-badge&logo=github)](https://github.com/AvishkaMadusanka/wordquest-hangman)
+[![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![React](https://img.shields.io/badge/React-19.x-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-Backend%20API-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 
-The backend stores accounts, player scores, and game history in the MongoDB database named `wordquest`. Passwords are stored as salted hashes. Registered players can log in from the header, and their day streak increases once per UTC calendar day when they finish a game. On the first successful start, existing data in `backend/data/store.json` is imported into MongoDB without removing that local file.
+An interactive, responsive Hangman web application designed with a retro-modern editorial aesthetic, procedural Web Audio cues, daily seeded challenges, and an optional full-stack backend with MongoDB streak tracking and leaderboards.
 
-The frontend and backend can be hosted as separate services. The backend uses port `4002` locally because port `4001` is already occupied on this computer; deployment hosts provide `PORT` automatically.
+---
 
-## Run locally
+## 🔗 Quick Links
 
-Install the frontend dependencies from the project root and the backend dependencies in its folder:
+- **Live Deployed Website:** [https://avishkamadusanka.github.io/wordquest-hangman/](https://avishkamadusanka.github.io/wordquest-hangman/)
+- **GitHub Repository:** [https://github.com/AvishkaMadusanka/wordquest-hangman](https://github.com/AvishkaMadusanka/wordquest-hangman)
 
+---
+
+## 🌟 Key Features
+
+1. **Rich Interactive Gameplay**
+   - **Category & Difficulty Filters:** Words categorized by Nature, Animals, Adventure, Music, Culture, Technology, and Countries, across Easy, Medium, and Hard tiers.
+   - **Daily Challenge:** A unique word each UTC day deterministically seeded from the calendar date.
+   - **Interactive SVG Gallows:** Real-time visual hangman progression rendered cleanly via scalable vector graphics.
+   - **Virtual Keyboard & Physical Typing:** Full support for onscreen tapping as well as physical keyboard inputs with automatic key state detection.
+   - **In-Game Hints:** Smart reveals with difficulty-scaled penalty adjustments.
+
+2. **Web Audio Synthesizer Engine**
+   - Zero-dependency sound effects generated directly in the browser using the **Web Audio API** (Oscillator + Gain nodes).
+   - Dynamic victory chimes, correct guess tones, and subtle ambient chords with user toggle controls.
+
+3. **Hybrid Architecture (Offline-First + Cloud-Enabled)**
+   - **Offline Standalone Mode:** Runs 100% in the browser using `localStorage` for streaks, statistics, and game history when the backend is offline.
+   - **Cloud Sync Mode:** When connected to the backend API, enables registered accounts, salted password hashing, cloud streak tracking, and a global leaderboard.
+
+---
+
+## 🛠️ Tech Stack & Implementation Overview
+
+| Component | Technology | Responsibility |
+| :--- | :--- | :--- |
+| **Frontend Framework** | **React 19** | Declarative state management, reactive keyboard and game loops |
+| **Build Tool** | **Vite 8** | High-performance bundling, Hot Module Replacement (HMR), static distribution |
+| **Styling** | **Vanilla CSS3** | Custom design tokens, CSS variables, glassmorphism, light/dark themes, responsive grid/flexbox layouts |
+| **Backend API** | **Node.js (HTTP / Express-style)** | Custom REST API server handling authentication, stats, and game sessions |
+| **Database** | **MongoDB / Mongoose** | Persistent storage for accounts, streaks, and match outcomes |
+| **Deployment & CI/CD** | **GitHub Actions + GitHub Pages** | Automated build pipeline (`npm run build`) and static artifact deployment |
+
+### Implementation Highlights
+
+- **Relative Asset Resolution:** Vite is configured with `base: "./"` in `frontend/vite.config.js` to ensure assets load properly under any nested sub-path (such as GitHub Pages' `/wordquest-hangman/`).
+- **Resilient API Handling:** The frontend checks the API health endpoint; if unavailable, it seamlessly falls back to offline mode without interrupting gameplay.
+- **Automated CI/CD:** `.github/workflows/deploy.yml` triggers on pushes to `main`, installing dependencies, building the static React bundle, and deploying to GitHub Pages.
+
+---
+
+## 🚀 Setup & Local Development Instructions
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) (version 20 or higher recommended)
+- [npm](https://www.npmjs.com/) (version 10 or higher)
+- *(Optional)* [MongoDB Atlas](https://www.mongodb.com/atlas) connection URI if running the backend server.
+
+### 1. Clone the Repository
 ```bash
+git clone https://github.com/AvishkaMadusanka/wordquest-hangman.git
+cd wordquest-hangman
+```
+
+### 2. Install Dependencies
+Install dependencies for the root/frontend and the backend:
+```bash
+# Install frontend dependencies
 npm install
+
+# Install backend dependencies
 npm --prefix backend install
 ```
 
-Set `MONGODB_URI` in `backend/.env` to your MongoDB connection string before starting the backend. Keep this file private and do not commit it.
+### 3. Configure Environment Variables (Optional for Backend)
+If you wish to run the Node.js API with database storage:
+1. Copy the example file in the `backend/` directory:
+   ```bash
+   cp backend/.env.example backend/.env
+   ```
+2. Open `backend/.env` and supply your MongoDB connection string:
+   ```env
+   PORT=4002
+   MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/wordquest?retryWrites=true&w=majority
+   FRONTEND_URL=http://localhost:5173
+   ```
 
-Start the backend in one terminal:
+### 4. Run the Application Locally
 
-```bash
-npm run server
-```
-
-Start the frontend in another terminal:
-
+#### Option A: Run Frontend Only (Offline Game Mode)
 ```bash
 npm run dev
 ```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-Open the local URL printed by Vite. The API health endpoint is `http://localhost:4002/api/health`.
+#### Option B: Run Full Stack (Frontend + Backend)
+Open two separate terminal windows:
 
-Create a production frontend build with:
+- **Terminal 1 (Backend API):**
+  ```bash
+  npm run server
+  ```
+  The API will start at `http://localhost:4002` (Health check: `http://localhost:4002/api/health`).
 
+- **Terminal 2 (Frontend Client):**
+  ```bash
+  npm run dev
+  ```
+  Open [http://localhost:5173](http://localhost:5173). The frontend automatically proxies `/api` requests to the backend.
+
+### 5. Build for Production
+To create an optimized production build of the static frontend:
 ```bash
 npm run build
 ```
+The compiled output will be generated in `frontend/dist/`.
 
-## Host frontend and backend separately
+---
 
-For the frontend static site, use the repository root, build command `npm install && npm run build`, and publish directory `frontend/dist`. Set `VITE_API_URL` to the backend's public HTTPS origin, such as `https://your-api.example`.
+## 🌐 Deployment Instructions
 
-For the backend Node.js service, set its root directory to `backend`, install dependencies with `npm install`, and use `npm start` as the start command. Add `MONGODB_URI` and `FRONTEND_URL` to its environment settings. Set `FRONTEND_URL` to the exact public frontend origin, such as `https://your-site.example`, and allow the backend host to connect to MongoDB Atlas.
+### Frontend (GitHub Pages)
+The repository contains an automated GitHub Actions workflow (`.github/workflows/deploy.yml`):
+1. Push your changes to the `main` branch.
+2. In your GitHub repository, navigate to **Settings** > **Pages**.
+3. Under **Build and deployment** > **Source**, choose **GitHub Actions**.
+4. The site deploys automatically on every push to `main`.
 
-The local frontend uses Vite's `/api` proxy automatically. For production, `VITE_API_URL` sends requests to the separately hosted backend, and the backend allows that frontend origin through CORS.
+### Backend (Render / Railway / Cloud Provider)
+To host the Node.js backend:
+1. Deploy as a Web Service (e.g. on [Render.com](https://render.com)).
+2. Set the **Root Directory** to `backend`.
+3. Set the **Build Command** to `npm install` and **Start Command** to `npm start`.
+4. Add the following Environment Variables in the provider dashboard:
+   - `MONGODB_URI`: Your MongoDB connection URI.
+   - `FRONTEND_URL`: `https://avishkamadusanka.github.io`
+5. On the frontend host, configure `VITE_API_URL` to point to your backend service URL.
 
-## Project structure
+---
 
-- `frontend/index.html` is the Vite entry point.
-- `frontend/src/main.jsx` contains the game and interface.
-- `frontend/styles.css` contains the visual styles.
-- `frontend/vite.config.js` configures Vite and proxies `/api` requests to the backend.
-- `backend/index.js` provides registration, login, daily streaks, and game APIs backed by MongoDB, with CORS configured for the hosted frontend.
-- `backend/package.json` manages backend dependencies and start commands. The root `package.json` runs the frontend and backend scripts.
+## 📂 Project Directory Structure
+
+```plaintext
+wordquest-hangman/
+├── .github/
+│   └── workflows/
+│       └── deploy.yml        # GitHub Actions CI/CD deployment pipeline
+├── backend/
+│   ├── data/
+│   │   └── store.json        # Initial offline data fallback
+│   ├── index.js              # Node.js REST API & MongoDB models
+│   ├── package.json          # Backend dependencies & scripts
+│   └── .env.example          # Sample environment configuration
+├── frontend/
+│   ├── src/
+│   │   └── main.jsx          # React app root, game state & audio synthesis
+│   ├── index.html            # Vite HTML entry point
+│   ├── styles.css            # Responsive layout & theme styles
+│   └── vite.config.js        # Vite configuration (base: "./", proxy)
+├── package.json              # Root package config & orchestration scripts
+└── README.md                 # Project documentation
+```
+
+---
+
+## 📄 License
+This project is open source and available under the [MIT License](LICENSE).
