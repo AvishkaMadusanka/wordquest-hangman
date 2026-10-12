@@ -2,7 +2,8 @@ import { StrictMode, useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "../styles.css";
 
-const API_BASE_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+const LIVE_API_URL = "https://wordquest-hangman-production.up.railway.app";
+const API_BASE_URL = (import.meta.env.VITE_API_URL || (import.meta.env.PROD ? LIVE_API_URL : "")).replace(/\/+$/, "");
 const apiUrl = (path) => `${API_BASE_URL}${path}`;
 
 const WORDS = [
@@ -158,8 +159,9 @@ function AccountModal({ onClose, onSuccess }) {
     const values = Object.fromEntries(new FormData(event.currentTarget));
     try {
       const response = await fetch(apiUrl(`/api/auth/${mode === "login" ? "login" : "register"}`), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(values) });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Unable to log in.");
+      const isJson = response.headers.get("content-type")?.includes("application/json");
+      const data = isJson ? await response.json() : {};
+      if (!response.ok) throw new Error(data.error || "Unable to reach server. Please try again.");
       onSuccess(data);
     } catch (requestError) {
       setError(requestError.message || "Unable to connect to the server.");
